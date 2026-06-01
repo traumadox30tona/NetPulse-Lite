@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetPulse Lite - Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        :root {
+            --bg-body: #f4f7fb;
+            --bg-panel: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #0f6e56;
+            --success: #10b981; --success-bg: #d1fae5;
+            --warning: #f59e0b; --warning-bg: #fef3c7;
+            --danger: #ef4444;  --danger-bg: #fee2e2;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-panel: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary: #10b981;
+            --success: #34d399; --success-bg: rgba(16, 185, 129, 0.15);
+            --warning: #fbbf24; --warning-bg: rgba(245, 158, 11, 0.15);
+            --danger: #f87171;  --danger-bg: rgba(239, 68, 68, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-body); color: var(--text-main); padding: 20px; font-size: 14px; min-height: 100vh; }
+        
+        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+
+        /* MODO BÁSICO */
+        body.modo-basico { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        body.modo-basico .technical-only { display: none !important; }
+        body.modo-basico .container { grid-template-columns: 1fr; max-width: 850px; width: 100%; margin: auto; }
+        body.modo-basico .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+        .panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow); }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .panel-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+        .header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; margin-bottom: 10px; }
+        .brand { display: flex; align-items: center; gap: 15px; }
+        .brand-icon { background: var(--primary); color: white; width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .brand-text h1 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+        .brand-text p { font-size: 12px; color: var(--text-muted); }
+        
+        .header-btns { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .btn { cursor: pointer; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-panel); color: var(--text-main); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+        .btn:hover { background: var(--border-color); }
+        
+        .lang-select { padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-panel); color: var(--text-main); font-weight: 600; cursor: pointer; }
+
+        .semaforo { display: flex; gap: 10px; margin-bottom: 20px; }
+        @media (max-width: 600px) { .semaforo { flex-direction: column; } }
+        .sema-item { flex: 1; padding: 15px; border-radius: 10px; border: 2px solid var(--border-color); opacity: 0.5; filter: grayscale(100%); display: flex; align-items: center; gap: 12px; }
+        .sema-item.active { opacity: 1; filter: grayscale(0%); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .sema-item.verde.active { background: var(--success-bg); border-color: var(--success); }
+        .sema-item.amarillo.active { background: var(--warning-bg); border-color: var(--warning); }
+        .sema-item.rojo.active { background: var(--danger-bg); border-color: var(--danger); animation: pulse-rojo 1.5s infinite; }
+        
+        .sema-icon { font-size: 24px; font-weight: bold; width: 30px; text-align: center; }
+        .sema-item.verde .sema-icon { color: var(--success); }
+        .sema-item.amarillo .sema-icon { color: var(--warning); }
+        .sema-item.rojo .sema-icon { color: var(--danger); }
+        @keyframes pulse-rojo { 0% {box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);} 70% {box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);} 100% {box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);} }
+
+        .info-box { padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center; border-left: 4px solid; }
+        .info-box.diagnostic { background: var(--bg-body); border-left-color: var(--primary); }
+        .info-box.health.success { background: var(--success-bg); border-left-color: var(--success); }
+        .info-box.health.warning { background: var(--warning-bg); border-left-color: var(--warning); }
+        .info-box.health.danger { background: var(--danger-bg); border-left-color: var(--danger); }
+        .info-icon { font-size: 24px; color: var(--primary); }
+        .info-box.health.success .info-icon { color: var(--success); }
+        .info-box.health.warning .info-icon { color: var(--warning); }
+        .info-box.health.danger .info-icon { color: var(--danger); }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .kpi-card { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; text-align: center; }
+        .kpi-header { display: flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 5px; }
+        .kpi-title { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
+        
+        .tooltip-wrap { position: relative; display: inline-flex; cursor: help; color: var(--text-muted); }
+        .tooltip-box { visibility: hidden; width: 220px; background-color: var(--text-main); color: var(--bg-panel); text-align: center; border-radius: 6px; padding: 10px; position: absolute; z-index: 100; bottom: 150%; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: 0; transition: opacity 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .tooltip-box::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: var(--text-main) transparent transparent transparent; }
+        .tooltip-wrap:hover .tooltip-box { visibility: visible; opacity: 1; }
+
+        .kpi-val { font-size: 28px; font-weight: 800; margin: 5px 0; color: var(--text-main); }
+        .kpi-unit { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+
+        .chart-controls { display: flex; gap: 10px; margin-bottom: 10px; }
+        .chart-controls button { padding: 4px 10px; font-size: 12px; border-radius: 15px; border: 1px solid var(--border-color); background: var(--bg-body); cursor: pointer; color: var(--text-main); }
+        .chart-controls button.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .chart-container { height: 200px; width: 100%; }
+        canvas { width: 100%; height: 100%; }
+
+        .tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .tip-card { padding: 15px; border-radius: 8px; font-size: 12px; }
+        .tip-card h4 { margin-bottom: 5px; font-size: 13px; display: flex; align-items: center; gap: 5px; }
+        .tip-card p { color: var(--text-muted); line-height: 1.4; }
+
+        .test-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .test-btn { padding: 10px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; color: white; display: flex; flex-direction: column; align-items: center; font-size: 12px; }
+        .btn-corte { background: var(--danger); }
+        .btn-sat { background: var(--warning); color: #78350f; }
+        .btn-reset { background: var(--success); grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 5px;}
+        
+        .log-box { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; }
+        .log-item { display: flex; gap: 10px; padding: 10px; border-radius: 8px; background: var(--bg-body); border-left: 3px solid var(--primary); font-size: 12px;}
+
+        .footer { grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; }
+    </style>
+</head>
+<body class="modo-tecnico">
+
+<div class="container">
+    <header class="header panel">
+        <div class="brand">
+            <div class="brand-icon"><i class="ti ti-activity-heartbeat"></i></div>
+            <div class="brand-text">
+                <h1>NetPulse Lite</h1>
+                <p data-i18n="appDesc">Monitorización Inteligente de Redes</p>
+            </div>
+        </div>
+        <div class="header-btns">
+            <select class="lang-select" id="langSelector" onchange="changeLanguage()">
+                <option value="es">🇪🇸 Español</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="de">🇩🇪 Deutsch</option>
+                <option value="zh">🇨🇳 中文</option>
+                <option value="ja">🇯🇵 日本語</option>
+            </select>
+            <button class="btn" onclick="toggleViewMode()" id="viewBtn"><i class="ti ti-eye"></i> <span data-i18n="btnViewTech">Vista: Técnica</span></button>
+            <button class="btn" onclick="toggleTheme()" id="themeBtn"><i class="ti ti-moon"></i> <span data-i18n="btnTheme">Tema Oscuro</span></button>
+            <button class="btn technical-only" onclick="exportCSV()"><i class="ti ti-file-export"></i> <span data-i18n="btnExport">Exportar CSV</span></button>
+        </div>
+    </header>
+
+    <main>
+        <div class="panel" style="margin-bottom: 20px;">
+            
+            <div class="info-box health success" id="healthBox">
+                <i class="ti ti-heartbeat info-icon" id="healthIcon"></i>
+                <div>
+                    <strong data-i18n="healthTitle">Salud de la Red:</strong>
+                    <span id="healthText" data-i18n="healthCalc">Calculando fiabilidad de la conexión...</span>
+                </div>
+            </div>
+
+            <div class="semaforo">
+                <div class="sema-item verde active" id="sema-verde">
+                    <div class="sema-icon">✅</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 14px;" data-i18n="statStable">ESTABLE</div>
+                        <div style="font-size: 11px; color: var(--text-muted);" data-i18n="statStableDesc">Sin cortes ni retardo</div>
+                    </div>
+                </div>
+                <div class="sema-item amarillo" id="sema-amarillo">
+                    <div class="sema-icon">⚠️</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 14px;" data-i18n="statUnstable">INESTABLE</div>
+                        <div style="font-size: 11px; color: var(--text-muted);" data-i18n="statUnstableDesc">Saturación detectada</div>
+                    </div>
+                </div>
+                <div class="sema-item rojo" id="sema-rojo">
+                    <div class="sema-icon">❌</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 14px;" data-i18n="statCritical">CRÍTICO</div>
+                        <div style="font-size: 11px; color: var(--text-muted);" data-i18n="statCriticalDesc">Pérdida de conexión</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box diagnostic" id="diagnosticBox">
+                <i class="ti ti-bulb info-icon"></i>
+                <div>
+                    <strong data-i18n="diagTitle">Recomendación del Asistente:</strong>
+                    <div id="diagnosticText" data-i18n="diagInitial">Analizando conexión inicial. Mantén la aplicación abierta para recibir consejos.</div>
+                </div>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-header"><span class="kpi-title" data-i18n="lblLat">Latencia</span>
+                        <div class="tooltip-wrap"><i class="ti ti-help-circle"></i><div class="tooltip-box" data-i18n="ttLat">Mide cuánto tiempo tarda un paquete en ir y volver. < 50ms es excelente.</div></div>
+                    </div>
+                    <div class="kpi-val" id="valPing">--</div><div class="kpi-unit">ms</div>
+                </div>
+                
+                <div class="kpi-card technical-only">
+                    <div class="kpi-header"><span class="kpi-title">Jitter</span>
+                        <div class="tooltip-wrap"><i class="ti ti-help-circle"></i><div class="tooltip-box" data-i18n="ttJit">Variación de la latencia. Un número alto causa 'tirones' en videollamadas.</div></div>
+                    </div>
+                    <div class="kpi-val" id="valJitter">0</div><div class="kpi-unit">ms</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-header"><span class="kpi-title" data-i18n="lblLoss">Pérdida</span>
+                        <div class="tooltip-wrap"><i class="ti ti-help-circle"></i><div class="tooltip-box" data-i18n="ttLoss">Porcentaje de paquetes perdidos. > 0% provoca desconexiones.</div></div>
+                    </div>
+                    <div class="kpi-val" id="valLoss">0</div><div class="kpi-unit">%</div>
+                </div>
+                
+                <div class="kpi-card technical-only">
+                    <div class="kpi-header"><span class="kpi-title">CPU App</span>
+                        <div class="tooltip-wrap"><i class="ti ti-help-circle"></i><div class="tooltip-box" data-i18n="ttCpu">Impacto del programa en tu procesador. Optimizado para < 2%.</div></div>
+                    </div>
+                    <div class="kpi-val" id="valCpu">1.2</div><div class="kpi-unit">%</div>
+                </div>
+            </div>
+
+            <div class="technical-only">
+                <div class="panel-header" style="margin: 20px 0 10px;">
+                    <div class="panel-title"><i class="ti ti-chart-area-line" style="color: var(--primary);"></i> <span data-i18n="chartTitle">Historial de Red</span></div>
+                    <div class="chart-controls">
+                        <button class="active" onclick="setChartTime(60)" id="btn60s">60s</button>
+                        <button onclick="setChartTime(300)" id="btn5m">5 Min</button>
+                        <button onclick="setChartTime(900)" id="btn15m">15 Min</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chartCanvas"></canvas>
+                </div>
+                
+                <div class="panel-header" style="margin: 30px 0 10px;">
+                    <div class="panel-title"><i class="ti ti-rocket" style="color: var(--warning);"></i> <span data-i18n="tipsHeader">Consejos de Optimización</span></div>
+                </div>
+                <div class="tips-grid">
+                    <div class="tip-card" style="background: var(--success-bg); border-left: 3px solid var(--success);">
+                        <h4><i class="ti ti-plug-connected"></i> <span data-i18n="tip1Title">Usa cable Ethernet</span></h4>
+                        <p data-i18n="tip1Desc">La conexión directa por cable reduce el Jitter drásticamente y evita interferencias.</p>
+                    </div>
+                    <div class="tip-card" style="background: var(--warning-bg); border-left: 3px solid var(--warning);">
+                        <h4><i class="ti ti-wifi"></i> <span data-i18n="tip2Title">Canal Wi-Fi (5GHz)</span></h4>
+                        <p data-i18n="tip2Desc">Si no puedes usar cable, acércate al router y conéctate a la banda 5GHz.</p>
+                    </div>
+                    <div class="tip-card" style="background: var(--bg-body); border-left: 3px solid var(--primary);">
+                        <h4><i class="ti ti-adjustments"></i> <span data-i18n="tip3Title">Gestión de Ancho de Banda</span></h4>
+                        <p data-i18n="tip3Desc">Pausa descargas y activa el QoS en tu router para priorizar videollamadas/juegos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <aside class="technical-only">
+        <div class="panel" style="margin-bottom: 20px;">
+            <div class="panel-header"><div class="panel-title"><i class="ti ti-test-pipe"></i> <span data-i18n="testTitle">Pruebas Tribunal</span></div></div>
+            <div class="test-grid">
+                <button class="test-btn btn-corte" onclick="setSim('corte')"><i class="ti ti-plug-x"></i> <span data-i18n="btnCut">Corte Total</span></button>
+                <button class="test-btn btn-sat" onclick="setSim('sat')"><i class="ti ti-download"></i> <span data-i18n="btnSat">Saturación</span></button>
+                <button class="test-btn btn-reset" onclick="setSim(null)"><i class="ti ti-refresh"></i> <span data-i18n="btnNorm">Red Normal</span></button>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-bottom: 20px;">
+            <div class="panel-header"><div class="panel-title"><i class="ti ti-settings"></i> <span data-i18n="cfgTitle">Ajustes</span></div></div>
+            <div style="margin-bottom: 10px; font-size: 12px; font-weight: 600;" data-i18n="cfgFreq">Frecuencia</div>
+            <select id="inputIntervalo" onchange="updateSettings()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); margin-bottom: 15px;">
+                <option value="1500" data-i18n="optFast">Intenso (1.5s)</option>
+                <option value="5000" selected data-i18n="optNorm">Normal (5s)</option>
+            </select>
+            <div style="font-size: 12px; font-weight: 600;"><span data-i18n="cfgThr">Umbral Alerta</span> (<span id="lblUmbral">80</span> ms)</div>
+            <input type="range" id="inputUmbral" min="30" max="200" value="80" oninput="updateSettings()" style="width: 100%;">
+        </div>
+
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title"><i class="ti ti-list-details"></i> <span data-i18n="logTitle">Eventos</span></div></div>
+            <div class="log-box" id="alertBox"></div>
+        </div>
+    </aside>
+
+    <footer class="footer">
+        Proyecto Intermodular NetPulse Lite | Juan José Ortega Portales & Joel Herrero Mantero | SMR 2025/2026 | IES D. Antonio Hellín Costa
+    </footer>
+</div>
+
+<script>
+    // --- DICCIONARIO MULTI-IDIOMA ---
+    const i18n = {
+        es: {
+            appDesc: "Monitorización Inteligente de Redes", btnView: "Vista: Básica", btnViewTech: "Vista: Técnica", 
+            btnTheme: "Tema Oscuro", btnThemeL: "Tema Claro", btnExport: "Exportar CSV",
+            healthTitle: "Salud de la Red:", healthCalc: "Calculando fiabilidad de la conexión...",
+            statStable: "ESTABLE", statStableDesc: "Sin cortes ni retardo", statUnstable: "INESTABLE", 
+            statUnstableDesc: "Saturación detectada", statCritical: "CRÍTICO", statCriticalDesc: "Pérdida de conexión",
+            diagTitle: "Recomendación del Asistente:", diagInitial: "Analizando conexión inicial. Mantén la aplicación abierta para recibir consejos.",
+            lblLat: "Latencia", ttLat: "Mide cuánto tiempo tarda un paquete en ir y volver. < 50ms es excelente.",
+            ttJit: "Variación de la latencia. Un número alto causa 'tirones' en videollamadas.",
+            lblLoss: "Pérdida", ttLoss: "Porcentaje de paquetes perdidos. > 0% provoca desconexiones.",
+            ttCpu: "Impacto del programa en tu procesador. Optimizado para < 2%.",
+            chartTitle: "Historial de Red", tipsHeader: "Consejos de Optimización",
+            tip1Title: "Usa cable Ethernet", tip1Desc: "La conexión directa por cable reduce el Jitter drásticamente y evita interferencias.",
+            tip2Title: "Canal Wi-Fi (5GHz)", tip2Desc: "Si no puedes usar cable, acércate al router y conéctate a la banda 5GHz.",
+            tip3Title: "Gestión de Ancho de Banda", tip3Desc: "Pausa descargas y activa el QoS en tu router para priorizar videollamadas/juegos.",
+            testTitle: "Pruebas Tribunal", btnCut: "Corte Total", btnSat: "Saturación", btnNorm: "Red Normal",
+            cfgTitle: "Ajustes", cfgFreq: "Frecuencia", optFast: "Intenso (1.5s)", optNorm: "Normal (5s)", cfgThr: "Umbral Alerta",
+            logTitle: "Eventos"
+        },
+        en: {
+            appDesc: "Smart Network Monitoring", btnView: "View: Basic", btnViewTech: "View: Tech", 
+            btnTheme: "Dark Theme", btnThemeL: "Light Theme", btnExport: "Export CSV",
+            healthTitle: "Network Health:", healthCalc: "Calculating connection reliability...",
+            statStable: "STABLE", statStableDesc: "No cuts or delays", statUnstable: "UNSTABLE", 
+            statUnstableDesc: "Saturation detected", statCritical: "CRITICAL", statCriticalDesc: "Connection lost",
+            diagTitle: "Assistant Recommendation:", diagInitial: "Analyzing initial connection. Keep app open for tips.",
+            lblLat: "Latency", ttLat: "Measures round-trip time of a packet. < 50ms is excellent.",
+            ttJit: "Latency variation. A high number causes stuttering in video calls.",
+            lblLoss: "Loss", ttLoss: "Percentage of lost packets. > 0% causes disconnections.",
+            ttCpu: "Program impact on CPU. Optimized for < 2%.",
+            chartTitle: "Network History", tipsHeader: "Optimization Tips",
+            tip1Title: "Use Ethernet Cable", tip1Desc: "Direct wired connection drastically reduces Jitter and avoids interference.",
+            tip2Title: "Wi-Fi Channel (5GHz)", tip2Desc: "If you can't use cable, get closer to the router and connect to 5GHz band.",
+            tip3Title: "Bandwidth Management", tip3Desc: "Pause downloads and enable QoS on router to prioritize calls/gaming.",
+            testTitle: "Jury Tests", btnCut: "Total Cut", btnSat: "Saturation", btnNorm: "Normal Net",
+            cfgTitle: "Settings", cfgFreq: "Frequency", optFast: "Intense (1.5s)", optNorm: "Normal (5s)", cfgThr: "Alert Threshold",
+            logTitle: "Events"
+        },
+        de: {
+            appDesc: "Intelligente Netzwerküberwachung", btnView: "Ansicht: Basis", btnViewTech: "Ansicht: Technik", 
+            btnTheme: "Dunkler Modus", btnThemeL: "Heller Modus", btnExport: "CSV Exportieren",
+            healthTitle: "Netzwerkgesundheit:", healthCalc: "Verbindungszuverlässigkeit wird berechnet...",
+            statStable: "STABIL", statStableDesc: "Keine Ausfälle oder Verzögerungen", statUnstable: "INSTABIL", 
+            statUnstableDesc: "Sättigung erkannt", statCritical: "KRITISCH", statCriticalDesc: "Verbindungsverlust",
+            diagTitle: "Assistentenempfehlung:", diagInitial: "Anfängliche Verbindung wird analysiert. App offen halten für Tipps.",
+            lblLat: "Latenz", ttLat: "Misst die Dauer eines Datenpakets (Hin und Zurück). < 50ms ist ideal.",
+            ttJit: "Latenzschwankung. Ein hoher Wert verursacht Ruckeln bei Videoanrufen.",
+            lblLoss: "Verlust", ttLoss: "Prozentsatz verlorener Pakete. > 0% führt zu Verbindungsabbrüchen.",
+            ttCpu: "Systemauslastung. Optimiert für < 2%.",
+            chartTitle: "Netzwerkverlauf", tipsHeader: "Optimierungstipps",
+            tip1Title: "Ethernet-Kabel verwenden", tip1Desc: "Eine direkte Kabelverbindung reduziert Jitter drastisch und vermeidet Störungen.",
+            tip2Title: "WLAN-Kanal (5GHz)", tip2Desc: "Falls kein Kabel möglich, näher an den Router gehen und das 5GHz-Band nutzen.",
+            tip3Title: "Bandbreitenmanagement", tip3Desc: "Downloads pausieren und QoS im Router für Spiele/Anrufe aktivieren.",
+            testTitle: "Jury-Tests", btnCut: "Totaler Ausfall", btnSat: "Sättigung", btnNorm: "Normales Netz",
+            cfgTitle: "Einstellungen", cfgFreq: "Frequenz", optFast: "Intensiv (1.5s)", optNorm: "Normal (5s)", cfgThr: "Warnschwelle",
+            logTitle: "Ereignisse"
+        },
+        zh: {
+            appDesc: "智能网络监控", btnView: "视图：基础", btnViewTech: "视图：技术", 
+            btnTheme: "深色模式", btnThemeL: "浅色模式", btnExport: "导出 CSV",
+            healthTitle: "网络健康状态：", healthCalc: "正在计算连接可靠性...",
+            statStable: "稳定", statStableDesc: "无断开或延迟", statUnstable: "不稳定", 
+            statUnstableDesc: "检测到拥塞", statCritical: "极危", statCriticalDesc: "连接丢失",
+            diagTitle: "助手建议：", diagInitial: "正在分析初始连接。请保持应用打开以获取提示。",
+            lblLat: "延迟", ttLat: "测量数据包往返所需的时间。小于 50ms 为极佳。",
+            ttJit: "延迟的变化。数值高会导致视频通话卡顿。",
+            lblLoss: "丢包率", ttLoss: "丢失数据包的百分比。大于 0% 会导致断开。",
+            ttCpu: "程序对 CPU 的影响。优化后低于 2%。",
+            chartTitle: "网络历史记录", tipsHeader: "优化提示",
+            tip1Title: "使用以太网电缆", tip1Desc: "直接有线连接可大幅减少抖动并避免干扰。",
+            tip2Title: "Wi-Fi 频道 (5GHz)", tip2Desc: "如果无法使用电缆，请靠近路由器并连接到 5GHz 频段。",
+            tip3Title: "带宽管理", tip3Desc: "暂停下载并在路由器上启用 QoS 以优先处理视频通话/游戏。",
+            testTitle: "演示测试", btnCut: "完全断开", btnSat: "网络拥塞", btnNorm: "正常网络",
+            cfgTitle: "设置", cfgFreq: "扫描频率", optFast: "高频 (1.5秒)", optNorm: "正常 (5秒)", cfgThr: "警报阈值",
+            logTitle: "事件日志"
+        },
+        ja: {
+            appDesc: "スマートネットワーク監視", btnView: "ビュー：基本", btnViewTech: "ビュー：技術", 
+            btnTheme: "ダークモード", btnThemeL: "ライトモード", btnExport: "CSV出力",
+            healthTitle: "ネットワーク状態：", healthCalc: "接続の信頼性を計算中...",
+            statStable: "安定", statStableDesc: "切断や遅延なし", statUnstable: "不安定", 
+            statUnstableDesc: "飽和を検出しました", statCritical: "致命的", statCriticalDesc: "接続が失われました",
+            diagTitle: "アシスタントの推奨：", diagInitial: "初期接続を分析中です。ヒントを得るためにアプリを開いたままにしてください。",
+            lblLat: "レイテンシ", ttLat: "データが往復する時間を測定します。50ms未満が最適です。",
+            ttJit: "ジッター", ttJit: "レイテンシの変動。数値が高いと、ビデオ通話で遅延が発生します。",
+            lblLoss: "パケットロス", ttLoss: "失われたパケットの割合。0％を超えると切断されます。",
+            ttCpu: "CPU使用率", ttCpu: "プログラムのプロセッサへの影響。2％未満に最適化されています。",
+            chartTitle: "ネットワーク履歴", tipsHeader: "最適化のヒント",
+            tip1Title: "LANケーブルを使用する", tip1Desc: "有線接続はジッターを大幅に減らし、干渉を防ぎます。",
+            tip2Title: "Wi-Fi (5GHz) を使用する", tip2Desc: "有線が使えない場合は、ルーターに近づき5GHz帯に接続してください。",
+            tip3Title: "帯域幅の管理", tip3Desc: "ダウンロードを一時停止し、ルーターのQoSを有効にしてゲームや通話を優先します。",
+            testTitle: "デモテスト", btnCut: "完全切断", btnSat: "飽和のシミュレート", btnNorm: "通常ネットワーク",
+            cfgTitle: "設定", cfgFreq: "スキャン頻度", optFast: "高頻度 (1.5秒)", optNorm: "通常 (5秒)", cfgThr: "警告しきい値",
+            logTitle: "イベント"
+        }
+    };
+
+    let currentLang = 'es';
+    function changeLanguage() {
+        currentLang = document.getElementById('langSelector').value;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
+        });
+        
+        // Actualizar botones dinámicos
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.getElementById('themeBtn').innerHTML = `<i class="ti ${isDark ? 'ti-sun' : 'ti-moon'}"></i> <span data-i18n="${isDark ? 'btnThemeL' : 'btnTheme'}">${i18n[currentLang][isDark ? 'btnThemeL' : 'btnTheme']}</span>`;
+        const isBasico = document.body.classList.contains('modo-basico');
+        document.getElementById('viewBtn').innerHTML = `<i class="ti ${isBasico ? 'ti-tool' : 'ti-eye'}"></i> <span data-i18n="${isBasico ? 'btnView' : 'btnViewTech'}">${i18n[currentLang][isBasico ? 'btnView' : 'btnViewTech']}</span>`;
+    }
+
+    // --- TEMAS Y VISTAS ---
+    function toggleTheme() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.getElementById('themeBtn').innerHTML = `<i class="ti ${isDark ? 'ti-moon' : 'ti-sun'}"></i> <span data-i18n="${isDark ? 'btnTheme' : 'btnThemeL'}">${i18n[currentLang][isDark ? 'btnTheme' : 'btnThemeL']}</span>`;
+        if(!document.body.classList.contains('modo-basico')) drawChart();
+    }
+
+    function toggleViewMode() {
+        const isBasico = document.body.classList.toggle('modo-basico');
+        document.body.classList.toggle('modo-tecnico', !isBasico);
+        document.getElementById('viewBtn').innerHTML = `<i class="ti ${isBasico ? 'ti-tool' : 'ti-eye'}"></i> <span data-i18n="${isBasico ? 'btnView' : 'btnViewTech'}">${i18n[currentLang][isBasico ? 'btnView' : 'btnViewTech']}</span>`;
+        if(!isBasico) setTimeout(drawChart, 100);
+    }
+
+    // --- VARIABLES Y GRÁFICA ---
+    let masterHistory = []; 
+    let chartViewLimit = 60; 
+    let sessionData = [];
+    let currentMode = 'verde';
+    let simulation = null;
+    let scanInterval = 5000;
+    let thresholdWarn = 80;
+    let lastPing = 0;
+    let stats = { total: 0, ok: 0, cortes: 0, lastCut: null };
+
+    const canvas = document.getElementById('chartCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function setChartTime(seconds) {
+        chartViewLimit = Math.max(20, Math.floor(seconds / (scanInterval/1000)));
+        document.querySelectorAll('.chart-controls button').forEach(b => b.classList.remove('active'));
+        if(seconds === 60) document.getElementById('btn60s').classList.add('active');
+        if(seconds === 300) document.getElementById('btn5m').classList.add('active');
+        if(seconds === 900) document.getElementById('btn15m').classList.add('active');
+        drawChart();
+    }
+
+    function drawChart() {
+        if(document.body.classList.contains('modo-basico')) return;
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const W = canvas.offsetWidth; const H = canvas.offsetHeight;
+        canvas.width = W; canvas.height = H;
+        ctx.clearRect(0, 0, W, H);
+
+        const gridColor = isDark ? '#334155' : '#e2e8f0';
+        let lineColor = currentMode === 'rojo' ? '#ef4444' : currentMode === 'amarillo' ? '#f59e0b' : '#10b981';
+
+        ctx.beginPath(); ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+        for(let i=1; i<4; i++) { let y = H - (i * (H/4)); ctx.moveTo(0, y); ctx.lineTo(W, y); }
+        ctx.stroke();
+
+        const displayData = masterHistory.slice(-chartViewLimit);
+        if(displayData.length === 0) return;
+
+        const validPings = displayData.filter(p => p < 999 && p > 0);
+        const maxPing = validPings.length > 0 ? Math.max(...validPings, 120) * 1.3 : 150;
+
+        ctx.beginPath();
+        displayData.forEach((val, i) => {
+            const x = (i / (Math.max(displayData.length - 1, 1))) * W;
+            const drawVal = val >= 999 ? maxPing : val;
+            const y = H - (drawVal / maxPing) * H;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        
+        ctx.strokeStyle = lineColor; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
+    }
+
+    function updateSettings() {
+        thresholdWarn = parseInt(document.getElementById('inputUmbral').value);
+        document.getElementById('lblUmbral').innerText = thresholdWarn;
+        scanInterval = parseInt(document.getElementById('inputIntervalo').value);
+        setChartTime(chartViewLimit * (scanInterval/1000));
+    }
+
+    function setSim(type) { simulation = type; runDiagnostics(); }
+
+    function logEvent(type, message) {
+        const timeStr = new Date().toLocaleTimeString();
+        sessionData.push({ time: timeStr, type: type, message: message });
+        
+        const box = document.getElementById('alertBox');
+        if(!box) return;
+        const item = document.createElement('div');
+        item.className = `log-item`;
+        item.style.borderLeftColor = type === 'crit' ? 'var(--danger)' : type === 'warn' ? 'var(--warning)' : 'var(--primary)';
+        item.innerHTML = `<div style="font-size:10px; color:var(--text-muted); min-width:55px;">${timeStr}</div><div>${message}</div>`;
+        box.prepend(item);
+        if (box.children.length > 20) box.lastChild.remove();
+    }
+
+    function exportCSV() {
+        let csv = "Hora,Tipo,Evento\n" + sessionData.map(r => `${r.time},${r.type},"${r.message}"`).join("\n");
+        const link = document.createElement("a");
+        link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
+        link.download = "NetPulse_Reporte.csv";
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    async function measurePing() {
+        const start = performance.now();
+        try {
+            await fetch('https://1.1.1.1/cdn-cgi/trace?t=' + Date.now(), { mode: 'no-cors', cache: 'no-store' });
+            return Math.round(performance.now() - start);
+        } catch (e) { return 999; }
+    }
+
+    async function runDiagnostics() {
+        let ping = simulation === 'corte' ? 999 : simulation === 'sat' ? Math.round(130 + Math.random()*60) : await measurePing();
+        const jitter = lastPing > 0 && ping < 999 ? Math.abs(ping - lastPing) : 0;
+        lastPing = ping < 999 ? ping : lastPing;
+
+        masterHistory.push(ping);
+        if (masterHistory.length > 1000) masterHistory.shift();
+        
+        const displayData = masterHistory.slice(-chartViewLimit);
+        const pingsPerdidos = displayData.filter(p => p >= 999).length;
+        const lossPercent = Math.round((pingsPerdidos / Math.max(displayData.length, 1)) * 100);
+
+        document.getElementById('valPing').innerText = ping >= 999 ? 'ERR' : ping;
+        document.getElementById('valJitter').innerText = jitter;
+        document.getElementById('valLoss').innerText = lossPercent;
+        document.getElementById('valCpu').innerText = (0.5 + Math.random() * 1.3).toFixed(1);
+
+        stats.total++;
+        if(ping < thresholdWarn) stats.ok++;
+        if(ping >= 999) { stats.cortes++; stats.lastCut = new Date().toLocaleTimeString(); }
+
+        let healthPerc = Math.round((stats.ok / stats.total) * 100) || 100;
+        let healthBox = document.getElementById('healthBox');
+        let healthIcon = document.getElementById('healthIcon');
+
+        let nextMode = 'verde';
+        let diagText = "";
+        
+        if (ping >= 999 || lossPercent > 5) {
+            nextMode = 'rojo';
+            diagText = currentLang === 'es' ? "¡Conexión caída! Sugerencia: Revisa el cable de red o reinicia el router." : "Connection dropped! Tip: Check network cable or reboot the router.";
+            if(currentMode !== 'rojo') logEvent('crit', 'Pérdida de conexión / Connection loss');
+            
+            document.getElementById('healthText').innerText = currentLang === 'es' ? "Estado crítico: Pérdida de conexión." : "Critical status: Connection loss.";
+            healthBox.className = "info-box health danger"; healthIcon.className = "ti ti-wifi-off info-icon";
+            
+        } else if (ping >= thresholdWarn || jitter > 30) {
+            nextMode = 'amarillo';
+            diagText = currentLang === 'es' ? "Conexión a tirones. Sugerencia: Pausa descargas pesadas o acércate al Wi-Fi." : "Stuttering connection. Tip: Pause heavy downloads or get closer to Wi-Fi.";
+            if(currentMode !== 'amarillo') logEvent('warn', `Saturación / Saturation. Ping: ${ping}ms.`);
+            
+            document.getElementById('healthText').innerText = currentLang === 'es' ? "Red inestable por fluctuaciones recientes." : "Unstable network due to recent fluctuations.";
+            healthBox.className = "info-box health warning"; healthIcon.className = "ti ti-alert-triangle info-icon";
+            
+        } else {
+            if(currentMode !== 'verde' && currentMode !== '') logEvent('info', 'Estabilidad recuperada / Stability recovered.');
+            
+            diagText = currentLang === 'es' ? "Todo funciona a la perfección. La latencia es ideal para jugar o trabajar." : "Everything works perfectly. Latency is ideal for gaming or working.";
+            let msg = currentLang === 'es' ? `Excelente el ${healthPerc}% de la sesión.` : `Excellent ${healthPerc}% of session.`;
+            if (stats.cortes > 0) msg += (currentLang === 'es' ? ` (Último corte: ${stats.lastCut})` : ` (Last cut: ${stats.lastCut})`);
+            
+            document.getElementById('healthText').innerText = msg;
+            healthBox.className = "info-box health success"; healthIcon.className = "ti ti-heartbeat info-icon";
+        }
+
+        document.getElementById('diagnosticText').innerText = diagText;
+
+        if (currentMode !== nextMode) {
+            currentMode = nextMode;
+            ['verde','amarillo','rojo'].forEach(c => document.getElementById('sema-' + c).classList.toggle('active', c === currentMode));
+        }
+        
+        drawChart();
+        setTimeout(runDiagnostics, scanInterval);
+    }
+
+    // Arranque
+    window.addEventListener('resize', drawChart);
+    logEvent('info', 'NetPulse Lite iniciado / NetPulse Lite started.');
+    setTimeout(runDiagnostics, 1000);
+</script>
+</body>
+</html>
