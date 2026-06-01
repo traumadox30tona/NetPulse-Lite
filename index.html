@@ -503,7 +503,9 @@
     async function measurePing() {
         const start = performance.now();
         try {
-            await fetch('https://1.1.1.1/cdn-cgi/trace?t=' + Date.now(), { mode: 'no-cors', cache: 'no-store' });
+            // Usamos la URL de tu propio GitHub para evitar los bloqueos de Brave y CORS
+            const pingUrl = window.location.href.split('#')[0] + (window.location.href.includes('?') ? '&' : '?') + 'ping=' + Date.now();
+            await fetch(pingUrl, { mode: 'no-cors', cache: 'no-store' });
             return Math.round(performance.now() - start);
         } catch (e) { return 999; }
     }
